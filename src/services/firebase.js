@@ -4,12 +4,12 @@ import { getAuth } from "firebase/auth";
 
 // Configuración de Firebase utilizando variables de entorno de Vite
 const firebaseConfig = {
-  apiKey: "AIzaSyAU5f7NM_CvxM_UU7CRIAfIdxT4gCOpEJE",
-  authDomain: "valhalla-service-c8523.firebaseapp.com",
-  projectId: "valhalla-service-c8523",
-  storageBucket: "valhalla-service-c8523.firebasestorage.app",
-  messagingSenderId: "955141773947",
-  appId: "1:955141773947:web:8173ed455b539434caa0de"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Inicializar Firebase
