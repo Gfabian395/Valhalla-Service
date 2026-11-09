@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../services/firebase';
 
+const ADMIN_WHATSAPP_NUMBER = '5491159781434';
+
 export default function SettingsService() {
   const [settings, setSettings] = useState({
     workshopName: 'Valhalla Service',
@@ -33,7 +35,6 @@ export default function SettingsService() {
       setErrorMsg('');
 
       try {
-        // 1. Cargar configuración del comercio (sólo lectura para datos principales)
         const comercioRef = doc(db, 'comercios', user.uid);
         const comercioSnap = await getDoc(comercioRef);
 
@@ -51,7 +52,6 @@ export default function SettingsService() {
           });
         }
 
-        // 2. Cargar planes disponibles desde Firebase (service_planes)
         const plansSnap = await getDocs(collection(db, 'service_planes'));
         if (!plansSnap.empty && isMounted) {
           const loadedPlans = [];
@@ -86,7 +86,6 @@ export default function SettingsService() {
     }));
   };
 
-  // Solo se guardan los parámetros operativos (garantía y términos)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -123,20 +122,21 @@ export default function SettingsService() {
   const handleUpgradePlan = (plan) => {
     const planName = plan.nombre || plan.name || 'Plan';
     const planPrice = Number(plan.precio || plan.price || 0);
+    const planMaintenance = Number(plan.mantenimiento_mensual || 0);
 
     const message = [
       `🚀 *SOLICITUD DE MEJORA DE PLAN - VALHALLA SERVICE*`,
       ``,
       `🏪 *Taller:* ${settings.workshopName}`,
       `👤 *Titular:* ${auth.currentUser?.displayName || 'Administrador'}`,
-      `💎 *Plan Deseado:* ${planName} ($${planPrice.toLocaleString('es-AR')}/mes)`,
+      `💎 *Plan Deseado:* ${planName}`,
+      `💵 *Alta:* $${planPrice.toLocaleString('es-AR')} | *Mantenimiento:* $${planMaintenance.toLocaleString('es-AR')}/mes`,
       `🆔 *ID Comercio:* ${auth.currentUser?.uid}`,
       ``,
-      `Hola, quiero solicitar la mejora de mi plan actual. Aguardo instrucciones para abonar y actualizar.`,
+      `Hola, quiero consultar o solicitar cambios en mi plan actual. Aguardo instrucciones.`,
     ].join('\n');
 
-    const adminPhone = settings.phone ? settings.phone.replace(/\D/g, '') : '5491100000000';
-    const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -152,7 +152,6 @@ export default function SettingsService() {
   return (
     <div className="space-y-6 w-full max-w-4xl mx-auto pb-12">
       
-      {/* Cabecera */}
       <div className="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
@@ -194,13 +193,11 @@ export default function SettingsService() {
         </div>
       )}
 
-      {/* Formulario de Configuración de Políticas */}
       <form
         onSubmit={handleSubmit}
         className="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-6"
       >
         
-        {/* Datos del Negocio (Solo Lectura - Configurados en el Onboarding) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -247,7 +244,6 @@ export default function SettingsService() {
           </div>
         </div>
 
-        {/* Garantías y Políticas (Editables) */}
         <div className="space-y-4 pt-2">
           <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider border-b border-slate-100 pb-2.5">
             Garantías y Políticas del Servicio (Editables)
@@ -281,7 +277,6 @@ export default function SettingsService() {
           </div>
         </div>
 
-        {/* Botón de Guardado */}
         <div className="flex items-center justify-end pt-4 border-t border-slate-100">
           <button
             type="submit"
@@ -297,43 +292,50 @@ export default function SettingsService() {
 
       </form>
 
-      {/* SECCIÓN: PLANES DE SUSCRIPCIÓN (DISCRETO Y ABAJO DE TODO) */}
       <div className="bg-slate-50 border border-slate-200/80 p-4 sm:p-5 rounded-2xl shadow-2xs space-y-3">
         <div className="border-b border-slate-200 pb-2">
           <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider">
             Mi Suscripción y Planes Disponibles
           </h3>
           <p className="text-[11px] text-slate-400">
-            Consultá o solicitá mejoras en tu plan actual de servicio.
+            Consultá tu plan activo de servicio.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           {plans.map((plan) => {
             const isCurrent = currentPlanId === plan.id;
             const planName = plan.nombre || plan.name || 'Plan';
             const planPrice = Number(plan.precio || plan.price || 0);
+            const planMaintenance = Number(plan.mantenimiento_mensual || 0);
 
             return (
               <div
                 key={plan.id}
-                className={`p-3.5 rounded-xl border flex flex-col justify-between text-xs transition-all ${
+                className={`p-4 rounded-xl border flex flex-col justify-between text-xs transition-all ${
                   isCurrent
                     ? 'bg-blue-50/70 border-blue-500 shadow-2xs'
                     : 'bg-white border-slate-200'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between gap-1 mb-1">
-                    <span className="font-bold text-slate-800">{planName}</span>
+                  <div className="flex items-center justify-between gap-1 mb-2">
+                    <span className="font-bold text-slate-800 text-sm">{planName}</span>
                     {isCurrent && (
                       <span className="text-[9px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase">
                         Actual
                       </span>
                     )}
                   </div>
-                  <div className="text-base font-extrabold text-blue-600">
-                    ${planPrice.toLocaleString('es-AR')} <span className="text-[10px] text-slate-400 font-normal">/mes</span>
+                  <div className="grid grid-cols-2 gap-2 text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Alta Única</span>
+                      <span className="font-bold text-blue-600">${planPrice.toLocaleString('es-AR')}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Mantenimiento</span>
+                      <span className="font-bold text-slate-800">${planMaintenance.toLocaleString('es-AR')}/m</span>
+                    </div>
                   </div>
                 </div>
 
@@ -341,9 +343,9 @@ export default function SettingsService() {
                   <button
                     type="button"
                     onClick={() => handleUpgradePlan(plan)}
-                    className="mt-3 w-full bg-slate-800 hover:bg-slate-900 text-white py-1.5 px-2.5 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1"
+                    className="mt-3 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 px-2.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1"
                   >
-                    <span>💬 Mejorar plan</span>
+                    <span>💬 Consultar Plan</span>
                   </button>
                 )}
               </div>

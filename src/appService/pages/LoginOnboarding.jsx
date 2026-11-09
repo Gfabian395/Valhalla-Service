@@ -4,6 +4,9 @@ import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../services/firebase';
 
+// 🔴 TU NÚMERO DE ADMINISTRADOR FIJO PARA RECIBIR LOS REGISTROS
+const ADMIN_WHATSAPP_NUMBER = '5491159781434';
+
 export default function LoginOnboarding() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -11,11 +14,9 @@ export default function LoginOnboarding() {
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  // Estados para el flujo de modales ('none' | 'register_business' | 'select_plan' | 'pending_activation')
   const [onboardingStep, setOnboardingStep] = useState('none');
   const [loggedUser, setLoggedUser] = useState(null);
 
-  // Formulario del Paso 1: Datos del Taller (Vacíos para que el usuario los cargue)
   const [businessData, setBusinessData] = useState({
     workshopName: '',
     ownerName: '',
@@ -23,11 +24,9 @@ export default function LoginOnboarding() {
     address: '',
   });
 
-  // Estado del Paso 2: Planes leídos exclusivamente desde Firebase (service_planes)
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  // Cargar planes reales desde la colección 'service_planes' en Firestore
   useEffect(() => {
     async function fetchPlans() {
       try {
@@ -37,10 +36,9 @@ export default function LoginOnboarding() {
           snap.forEach((docSnap) => {
             loaded.push({ id: docSnap.id, ...docSnap.data() });
           });
-          // Ordenar por precio de menor a mayor
           loaded.sort((a, b) => Number(a.precio || a.price || 0) - Number(b.precio || b.price || 0));
           setPlans(loaded);
-          setSelectedPlan(loaded[0]); // Seleccionar el primer plan por defecto
+          setSelectedPlan(loaded[0]);
         }
       } catch (err) {
         console.error('Error al cargar planes desde Firebase:', err);
@@ -62,7 +60,6 @@ export default function LoginOnboarding() {
       const user = result.user;
       setLoggedUser(user);
 
-      // Consulta estricta en la colección central multicomercio 'comercios/{uid}'
       const comercioRef = doc(db, 'comercios', user.uid);
       const comercioSnap = await getDoc(comercioRef);
 
@@ -71,19 +68,16 @@ export default function LoginOnboarding() {
         const isConfigured = Boolean(
           data.workshopConfigured && (data.name || data.workshopName)
         );
-        // Verificación estricta de activación manual por pago
         const isActive = data.status === true;
 
         if (isConfigured && isActive) {
           navigate('/service/reparaciones');
           return;
         } else if (isConfigured && !isActive) {
-          // Si ya está configurado pero inactivo, mostrar pantalla de espera
           setOnboardingStep('pending_activation');
           return;
         }
 
-        // Si existe pero le falta completar datos
         setBusinessData({
           workshopName: data.workshopName || data.name || '',
           ownerName: data.ownerName || user.displayName || '',
@@ -92,7 +86,6 @@ export default function LoginOnboarding() {
         });
         setOnboardingStep('register_business');
       } else {
-        // Usuario nuevo: inicializar formulario con datos de Google
         setBusinessData({
           workshopName: '',
           ownerName: user.displayName || '',
@@ -115,7 +108,6 @@ export default function LoginOnboarding() {
     }
   };
 
-  // Función para verificar si el administrador ya activó la cuenta manualmente
   const handleCheckActivation = async () => {
     if (!loggedUser) return;
     setCheckingStatus(true);
@@ -143,7 +135,6 @@ export default function LoginOnboarding() {
     }
   };
 
-  // Paso 1 -> Validar datos del comercio y pasar al modal de selección de plan
   const handleBusinessSubmit = (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -160,7 +151,6 @@ export default function LoginOnboarding() {
     setOnboardingStep('select_plan');
   };
 
-  // Paso 2 -> Guardar con status: false (inactivo), abrir WhatsApp y pasar a la pantalla de espera
   const handleConfirmRegistration = async () => {
     if (!loggedUser || !selectedPlan) return;
 
@@ -170,8 +160,8 @@ export default function LoginOnboarding() {
     try {
       const planName = selectedPlan.nombre || selectedPlan.name || 'Plan';
       const planPrice = Number(selectedPlan.precio || selectedPlan.price || 0);
+      const planMaintenance = Number(selectedPlan.mantenimiento_mensual || 0);
 
-      // Estructura limpia y reducida únicamente a los datos esenciales del comercio
       const payload = {
         ownerUid: loggedUser.uid,
         name: businessData.workshopName.trim(),
@@ -182,44 +172,35 @@ export default function LoginOnboarding() {
         planId: selectedPlan.id,
         planName: planName,
         planPrice: planPrice,
+        planMaintenance: planMaintenance,
         workshopConfigured: true,
-        status: false, // 🔴 Nace INACTIVO hasta que se verifique el pago manualmente
+        status: false,
         createdAt: serverTimestamp(),
       };
 
-      // Guardado unificado bajo la arquitectura multicomercio comercios/{storeId}
       const comercioRef = doc(db, 'comercios', loggedUser.uid);
       await setDoc(comercioRef, payload, { merge: true });
 
-      // Limpieza y formato del teléfono del comercio para el enlace de WhatsApp
-      let cleanPhone = String(businessData.phone).replace(/\D/g, '');
-      if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.slice(1);
-      if (!cleanPhone.startsWith('54')) {
-        cleanPhone = `549${cleanPhone}`;
-      } else if (cleanPhone.startsWith('54') && !cleanPhone.startsWith('549')) {
-        cleanPhone = `549${cleanPhone.slice(2)}`;
-      }
-
-      // Mensaje estructurado de alta pendiente de pago
+      // Mensaje estructurado que se envía DIRECTAMENTE A TU WHATSAPP DE DUEÑO
       const whatsappMessage = [
         '🚨 *REGISTRO PENDIENTE DE PAGO - VALHALLA SERVICE*',
         '',
         `🏪 *Taller:* ${payload.name}`,
         `👤 *Titular:* ${payload.ownerName}`,
-        `📱 *WhatsApp:* ${payload.phone}`,
-        `💎 *Plan Elegido:* ${planName} ($${planPrice.toLocaleString('es-AR')})`,
+        `📱 *WhatsApp Local:* ${payload.phone}`,
+        `💎 *Plan Elegido:* ${planName}`,
+        `💵 *Pago Único de Alta:* $${planPrice.toLocaleString('es-AR')}`,
+        `🔄 *Mantenimiento Mensual:* $${planMaintenance.toLocaleString('es-AR')}`,
         `🆔 *ID Comercio:* ${loggedUser.uid}`,
         '',
-        'He completado mi registro. Aguardo instrucciones para abonar y activar mi cuenta.',
+        'El comercio ha completado su registro y aguarda validación para activar su cuenta.',
       ].join('\n');
 
-      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+      const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
         whatsappMessage
       )}`;
 
       window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-
-      // Pasar a la pantalla de espera de habilitación (igual a Store)
       setOnboardingStep('pending_activation');
     } catch (error) {
       console.error('Error al registrar el taller y plan:', error);
@@ -233,7 +214,6 @@ export default function LoginOnboarding() {
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-4 selection:bg-blue-600 selection:text-white">
       <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-md text-center space-y-6">
 
-        {/* Logo y Encabezado */}
         <div className="space-y-2 text-center">
           <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto shadow-sm overflow-hidden p-1">
             <img
@@ -250,14 +230,12 @@ export default function LoginOnboarding() {
           </p>
         </div>
 
-        {/* Notificación de Error o Aviso */}
         {errorMsg && onboardingStep === 'none' && (
           <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium leading-relaxed">
             {errorMsg}
           </div>
         )}
 
-        {/* Acceso con Google */}
         <div className="border-t border-slate-100 pt-6 space-y-4">
           <p className="text-xs text-slate-500 leading-relaxed">
             Iniciá sesión de forma segura con tu cuenta de Google para administrar tu taller en producción.
@@ -303,9 +281,6 @@ export default function LoginOnboarding() {
 
       </div>
 
-      {/* =====================================================================
-          MODAL 1: REGISTRO DE COMERCIO / TALLER
-         ===================================================================== */}
       {onboardingStep === 'register_business' && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-md p-0 sm:p-4 overflow-y-auto transition-all">
           <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-t-2xl sm:rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-auto">
@@ -424,9 +399,6 @@ export default function LoginOnboarding() {
         </div>
       )}
 
-      {/* =====================================================================
-          MODAL 2: SELECCIÓN DE PLAN Y ENVÍO A WHATSAPP
-         ===================================================================== */}
       {onboardingStep === 'select_plan' && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-md p-0 sm:p-4 overflow-y-auto transition-all">
           <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-t-2xl sm:rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-auto flex flex-col max-h-[92vh]">
@@ -461,20 +433,22 @@ export default function LoginOnboarding() {
             )}
 
             <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {plans.map((plan) => {
                   const isSelected = selectedPlan?.id === plan.id;
                   const planName = plan.nombre || plan.name || 'Plan';
                   const planPrice = Number(plan.precio || plan.price || 0);
+                  const planMaintenance = Number(plan.mantenimiento_mensual || 0);
 
                   return (
                     <div
                       key={plan.id}
                       onClick={() => setSelectedPlan(plan)}
-                      className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between ${isSelected
+                      className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
+                        isSelected
                           ? 'bg-blue-50/60 border-blue-600 shadow-md'
                           : 'bg-white border-slate-200 hover:border-blue-300'
-                        }`}
+                      }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2">
@@ -482,28 +456,37 @@ export default function LoginOnboarding() {
                             {planName}
                           </h4>
                           <div
-                            className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected
+                            className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                              isSelected
                                 ? 'border-blue-600 bg-blue-600 text-white'
                                 : 'border-slate-300 bg-white'
-                              }`}
+                            }`}
                           >
                             {isSelected && <span className="text-[10px]">✓</span>}
                           </div>
                         </div>
 
-                        <div className="mt-2 flex items-baseline gap-1">
-                          <span className="text-2xl font-extrabold text-blue-600">
-                            ${planPrice.toLocaleString('es-AR')}
-                          </span>
-                          <span className="text-xs text-slate-500">
-                            / mes
-                          </span>
+                        {/* Visualización clara de Pago Único y Mantenimiento Mensual */}
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/80 p-3 rounded-xl border border-slate-200/60">
+                          <div>
+                            <span className="text-[11px] text-slate-400 block">Pago Único de Alta</span>
+                            <span className="text-xl font-extrabold text-blue-600">
+                              ${planPrice.toLocaleString('es-AR')}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[11px] text-slate-400 block">Mantenimiento Mensual</span>
+                            <span className="text-xl font-extrabold text-slate-800">
+                              ${planMaintenance.toLocaleString('es-AR')}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="mt-4 space-y-1.5 border-t border-slate-200/70 pt-3 text-xs text-slate-700">
-                          <p>Órdenes activas: <span className="font-semibold">{plan.maximo_ordenes_activas || 'Ilimitadas'}</span></p>
+                          <p>Órdenes activas máx.: <span className="font-semibold">{plan.maximo_ordenes_activas || 'Ilimitadas'}</span></p>
                           <p>Clientes máx.: <span className="font-semibold">{plan.maximo_clientes || 'Ilimitados'}</span></p>
-                          <p>Máx. categorías: <span className="font-semibold">{plan.maximo_categorias || 'Ilimitadas'}</span></p>
+                          <p>Categorías máx.: <span className="font-semibold">{plan.maximo_categorias || 'Ilimitadas'}</span></p>
+                          <p>Productos por categoría: <span className="font-semibold">{plan.maximo_productos_por_categoria || 'Ilimitados'}</span></p>
                         </div>
                       </div>
                     </div>
@@ -513,8 +496,7 @@ export default function LoginOnboarding() {
 
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <div>
-                  <span className="font-semibold text-slate-800">Taller:</span>{' '}
-                  {businessData.workshopName} ({businessData.ownerName})
+                  <span className="font-semibold text-slate-800">Taller:</span> {businessData.workshopName} ({businessData.ownerName})
                 </div>
                 <div>
                   <span className="font-semibold text-slate-800">Plan seleccionado:</span>{' '}
@@ -544,9 +526,7 @@ export default function LoginOnboarding() {
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
                 <span>
-                  {saving
-                    ? 'Procesando Registro...'
-                    : 'Confirmar y Enviar a WhatsApp'}
+                  {saving ? 'Procesando Registro...' : 'Confirmar y Enviar a WhatsApp'}
                 </span>
               </button>
             </div>
@@ -555,9 +535,6 @@ export default function LoginOnboarding() {
         </div>
       )}
 
-      {/* =====================================================================
-          MODAL 3: ESPERANDO CONFIRMACIÓN / HABILITACIÓN DE PAGO (ESTILO STORE)
-         ===================================================================== */}
       {onboardingStep === 'pending_activation' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center space-y-6">
@@ -574,7 +551,7 @@ export default function LoginOnboarding() {
                 Esperando Confirmación de Pago
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Tu taller ya fue registrado y elegiste tu plan. Una vez que acredites el pago con el administrador, tu cuenta será habilitada para gestionar tus órdenes y clientes.
+                Tu taller ya fue registrado. Una vez que acredites el pago único de alta y mantenimiento con el administrador, tu cuenta será habilitada.
               </p>
             </div>
 
