@@ -181,7 +181,6 @@ export default function LoginOnboarding() {
       const comercioRef = doc(db, 'comercios', loggedUser.uid);
       await setDoc(comercioRef, payload, { merge: true });
 
-      // Mensaje estructurado que se envía DIRECTAMENTE A TU WHATSAPP DE DUEÑO
       const whatsappMessage = [
         '🚨 *REGISTRO PENDIENTE DE PAGO - VALHALLA SERVICE*',
         '',
@@ -211,8 +210,8 @@ export default function LoginOnboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-4 selection:bg-blue-600 selection:text-white">
-      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-md text-center space-y-6">
+    <div className="min-h-screen bg-slate-950/40 backdrop-blur-md text-slate-900 flex flex-col items-center justify-center p-4 selection:bg-indigo-600 selection:text-white">
+      <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-md text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
 
         <div className="space-y-2 text-center">
           <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto shadow-sm overflow-hidden p-1">
@@ -222,22 +221,22 @@ export default function LoginOnboarding() {
               className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-wider text-slate-800 pt-2">
-            VALHALLA <span className="text-blue-600 font-light">SERVICE</span>
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-wider text-slate-900 pt-2">
+            VALHALLA <span className="text-indigo-600 font-light">SERVICE</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500 font-medium">
             Sistema Profesional de Gestión para Talleres
           </p>
         </div>
 
         {errorMsg && onboardingStep === 'none' && (
-          <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium leading-relaxed">
+          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold leading-relaxed">
             {errorMsg}
           </div>
         )}
 
         <div className="border-t border-slate-100 pt-6 space-y-4">
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
             Iniciá sesión de forma segura con tu cuenta de Google para administrar tu taller en producción.
           </p>
 
@@ -245,7 +244,7 @@ export default function LoginOnboarding() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white py-3.5 px-4 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-3 cursor-pointer touch-manipulation"
+            className="w-full bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 disabled:opacity-50 text-white py-3.5 px-4 rounded-2xl text-sm font-semibold transition-all shadow-md shadow-indigo-500/20 flex items-center justify-center gap-3 cursor-pointer touch-manipulation"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -274,7 +273,7 @@ export default function LoginOnboarding() {
         </div>
 
         <div className="pt-2">
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-400 font-medium">
             Valhalla Service • Entorno de Producción Directo
           </p>
         </div>
@@ -282,19 +281,19 @@ export default function LoginOnboarding() {
       </div>
 
       {onboardingStep === 'register_business' && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-md p-0 sm:p-4 overflow-y-auto transition-all">
-          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-t-2xl sm:rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 overflow-y-auto transition-all">
+          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-t-3xl sm:rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
 
-            <div className="flex justify-between items-center px-5 py-4 border-b border-slate-100 bg-slate-50/60">
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
+            <div className="flex justify-between items-center px-5 py-4.5 border-b border-slate-100 bg-linear-to-r from-slate-50/80 to-indigo-50/30">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
                   1/2
                 </span>
                 <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-800">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                     Registro del Taller
                   </h3>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-xs text-slate-500">
                     Completá los datos de tu local para configurar tu cuenta.
                   </p>
                 </div>
@@ -302,22 +301,23 @@ export default function LoginOnboarding() {
               <button
                 type="button"
                 onClick={() => setOnboardingStep('none')}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {errorMsg && (
-              <div className="px-5 py-2.5 bg-rose-50 border-b border-rose-100 text-rose-600 text-xs font-medium">
+              <div className="px-5 py-2.5 bg-rose-50 border-b border-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                 {errorMsg}
               </div>
             )}
 
             <form onSubmit={handleBusinessSubmit} className="p-5 sm:p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Nombre del Taller / Comercio <span className="text-blue-600">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Nombre del Taller / Comercio <span className="text-indigo-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -327,13 +327,13 @@ export default function LoginOnboarding() {
                     setBusinessData({ ...businessData, workshopName: e.target.value })
                   }
                   placeholder="Ej. Valhalla Service"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 shadow-sm transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Nombre y Apellido del Titular <span className="text-blue-600">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Nombre y Apellido del Titular <span className="text-indigo-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -343,13 +343,13 @@ export default function LoginOnboarding() {
                     setBusinessData({ ...businessData, ownerName: e.target.value })
                   }
                   placeholder="Ej. Fabián González"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 shadow-sm transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Teléfono / WhatsApp del Taller <span className="text-blue-600">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Teléfono / WhatsApp del Taller <span className="text-indigo-600">*</span>
                 </label>
                 <input
                   type="tel"
@@ -359,13 +359,13 @@ export default function LoginOnboarding() {
                     setBusinessData({ ...businessData, phone: e.target.value })
                   }
                   placeholder="Ej. 11 2345 6789"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 shadow-sm transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Dirección del Local <span className="text-slate-400 font-normal">(opcional)</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Dirección del Local <span className="text-slate-400 font-normal lowercase">(opcional)</span>
                 </label>
                 <input
                   type="text"
@@ -374,21 +374,21 @@ export default function LoginOnboarding() {
                     setBusinessData({ ...businessData, address: e.target.value })
                   }
                   placeholder="Ej. Av. Calchaquí 1234, Quilmes"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 shadow-sm transition-all"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setOnboardingStep('none')}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 cursor-pointer"
+                  className="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 px-5 py-3 rounded-2xl text-sm font-semibold transition-all border border-slate-200/80 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm cursor-pointer flex items-center gap-2"
+                  className="bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 text-white px-6 py-3 rounded-2xl text-sm font-semibold transition-all shadow-md shadow-indigo-500/20 cursor-pointer flex items-center gap-2"
                 >
                   <span>Siguiente: Elegir Plan</span>
                   <span>→</span>
@@ -400,19 +400,19 @@ export default function LoginOnboarding() {
       )}
 
       {onboardingStep === 'select_plan' && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-md p-0 sm:p-4 overflow-y-auto transition-all">
-          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-t-2xl sm:rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-auto flex flex-col max-h-[92vh]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 overflow-y-auto transition-all">
+          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-t-3xl sm:rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl my-auto flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200">
 
-            <div className="flex justify-between items-center px-5 sm:px-6 py-4 border-b border-slate-100 bg-slate-50/60 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
+            <div className="flex justify-between items-center px-5 sm:px-6 py-4.5 border-b border-slate-100 bg-linear-to-r from-slate-50/80 to-indigo-50/30 shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
                   2/2
                 </span>
                 <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-800">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                     Seleccioná tu Plan de Suscripción
                   </h3>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-xs text-slate-500">
                     Elegí el plan para tu taller y confirmá tu registro.
                   </p>
                 </div>
@@ -420,19 +420,20 @@ export default function LoginOnboarding() {
               <button
                 type="button"
                 onClick={() => setOnboardingStep('register_business')}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-800 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition-colors cursor-pointer"
               >
                 ← Volver
               </button>
             </div>
 
             {errorMsg && (
-              <div className="px-5 py-2.5 bg-rose-50 border-b border-rose-100 text-rose-600 text-xs font-medium shrink-0">
+              <div className="px-5 py-2.5 bg-rose-50 border-b border-rose-100 text-rose-600 text-xs font-semibold shrink-0 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                 {errorMsg}
               </div>
             )}
 
-            <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
               <div className="grid grid-cols-1 gap-4">
                 {plans.map((plan) => {
                   const isSelected = selectedPlan?.id === plan.id;
@@ -446,47 +447,47 @@ export default function LoginOnboarding() {
                       onClick={() => setSelectedPlan(plan)}
                       className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
                         isSelected
-                          ? 'bg-blue-50/60 border-blue-600 shadow-md'
-                          : 'bg-white border-slate-200 hover:border-blue-300'
+                          ? 'bg-indigo-50/50 border-indigo-600 shadow-md ring-2 ring-indigo-500/10'
+                          : 'bg-white border-slate-200/90 hover:border-indigo-300'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2">
-                          <h4 className="text-base font-bold text-slate-800">
+                          <h4 className="text-base font-bold text-slate-900">
                             {planName}
                           </h4>
                           <div
-                            className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                            className={`w-6 h-6 rounded-full border flex items-center justify-center font-bold text-xs transition-all ${
                               isSelected
-                                ? 'border-blue-600 bg-blue-600 text-white'
-                                : 'border-slate-300 bg-white'
+                                ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
+                                : 'border-slate-300 bg-white text-transparent'
                             }`}
                           >
-                            {isSelected && <span className="text-[10px]">✓</span>}
+                            ✓
                           </div>
                         </div>
 
                         {/* Visualización clara de Pago Único y Mantenimiento Mensual */}
-                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/80 p-3 rounded-xl border border-slate-200/60">
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/70">
                           <div>
-                            <span className="text-[11px] text-slate-400 block">Pago Único de Alta</span>
-                            <span className="text-xl font-extrabold text-blue-600">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Pago Único de Alta</span>
+                            <span className="text-xl font-extrabold text-indigo-600">
                               ${planPrice.toLocaleString('es-AR')}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[11px] text-slate-400 block">Mantenimiento Mensual</span>
-                            <span className="text-xl font-extrabold text-slate-800">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Mantenimiento Mensual</span>
+                            <span className="text-xl font-extrabold text-slate-900">
                               ${planMaintenance.toLocaleString('es-AR')}
                             </span>
                           </div>
                         </div>
 
-                        <div className="mt-4 space-y-1.5 border-t border-slate-200/70 pt-3 text-xs text-slate-700">
-                          <p>Órdenes activas máx.: <span className="font-semibold">{plan.maximo_ordenes_activas || 'Ilimitadas'}</span></p>
-                          <p>Clientes máx.: <span className="font-semibold">{plan.maximo_clientes || 'Ilimitados'}</span></p>
-                          <p>Categorías máx.: <span className="font-semibold">{plan.maximo_categorias || 'Ilimitadas'}</span></p>
-                          <p>Productos por categoría: <span className="font-semibold">{plan.maximo_productos_por_categoria || 'Ilimitados'}</span></p>
+                        <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3 text-xs text-slate-600 font-medium">
+                          <p>Órdenes activas máx.: <span className="font-bold text-slate-900">{plan.maximo_ordenes_activas || 'Ilimitadas'}</span></p>
+                          <p>Clientes máx.: <span className="font-bold text-slate-900">{plan.maximo_clientes || 'Ilimitados'}</span></p>
+                          <p>Categorías máx.: <span className="font-bold text-slate-900">{plan.maximo_categorias || 'Ilimitadas'}</span></p>
+                          <p>Productos por categoría: <span className="font-bold text-slate-900">{plan.maximo_productos_por_categoria || 'Ilimitados'}</span></p>
                         </div>
                       </div>
                     </div>
@@ -494,25 +495,25 @@ export default function LoginOnboarding() {
                 })}
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-xs text-slate-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
                 <div>
-                  <span className="font-semibold text-slate-800">Taller:</span> {businessData.workshopName} ({businessData.ownerName})
+                  <span className="font-bold text-slate-900">Taller:</span> {businessData.workshopName} ({businessData.ownerName})
                 </div>
                 <div>
-                  <span className="font-semibold text-slate-800">Plan seleccionado:</span>{' '}
-                  <span className="text-blue-600 font-bold">
+                  <span className="font-bold text-slate-900">Plan seleccionado:</span>{' '}
+                  <span className="text-indigo-600 font-extrabold">
                     {selectedPlan?.nombre || selectedPlan?.name}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-end gap-2.5 px-5 sm:px-6 py-4 border-t border-slate-100 bg-white shrink-0">
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 px-5 sm:px-6 py-4 border-t border-slate-100 bg-white shrink-0">
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => setOnboardingStep('register_business')}
-                className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 cursor-pointer"
+                className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 px-5 py-3 rounded-2xl text-sm font-semibold border border-slate-200/80 cursor-pointer disabled:opacity-50"
               >
                 Atrás
               </button>
@@ -520,7 +521,7 @@ export default function LoginOnboarding() {
                 type="button"
                 disabled={saving || !selectedPlan}
                 onClick={handleConfirmRegistration}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:w-auto bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 disabled:opacity-50 text-white px-6 py-3 rounded-2xl text-sm font-semibold shadow-md shadow-indigo-500/20 cursor-pointer flex items-center justify-center gap-2"
               >
                 {saving && (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -536,42 +537,43 @@ export default function LoginOnboarding() {
       )}
 
       {onboardingStep === 'pending_activation' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6 sm:p-8 text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
 
-            <div className="w-16 h-16 rounded-full bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto text-2xl shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto text-2xl shadow-sm">
               ⏳
             </div>
 
             <div className="space-y-2">
-              <span className="inline-block bg-amber-100 text-amber-800 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
+              <span className="inline-block bg-amber-100 text-amber-900 text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">
                 Activación Pendiente
               </span>
-              <h3 className="text-xl font-bold text-slate-800">
+              <h3 className="text-xl font-bold text-slate-900">
                 Esperando Confirmación de Pago
               </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
                 Tu taller ya fue registrado. Una vez que acredites el pago único de alta y mantenimiento con el administrador, tu cuenta será habilitada.
               </p>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left space-y-1.5 text-xs text-slate-600">
-              <p><span className="font-semibold text-slate-800">Cuenta:</span> {loggedUser?.email}</p>
-              <p><span className="font-semibold text-slate-800">Estado:</span> <span className="text-amber-600 font-bold">Pendiente de habilitación</span></p>
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-left space-y-1.5 text-xs text-slate-600 font-medium">
+              <p><span className="font-bold text-slate-900">Cuenta:</span> {loggedUser?.email}</p>
+              <p><span className="font-bold text-slate-900">Estado:</span> <span className="text-amber-600 font-bold">Pendiente de habilitación</span></p>
             </div>
 
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-medium">
+              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                 {errorMsg}
               </div>
             )}
 
-            <div className="space-y-2.5 pt-2">
+            <div className="space-y-3 pt-2">
               <button
                 type="button"
                 disabled={checkingStatus}
                 onClick={handleCheckActivation}
-                className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white py-3 px-4 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 disabled:opacity-50 text-white py-3.5 px-4 rounded-2xl text-sm font-semibold transition-all shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {checkingStatus ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -584,7 +586,7 @@ export default function LoginOnboarding() {
               <button
                 type="button"
                 onClick={() => setOnboardingStep('none')}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                className="w-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 py-3 px-4 rounded-2xl text-xs font-semibold transition-colors cursor-pointer border border-slate-200/80"
               >
                 Cerrar sesión / Volver
               </button>

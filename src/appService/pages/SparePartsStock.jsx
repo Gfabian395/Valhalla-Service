@@ -315,12 +315,12 @@ export default function SparePartsStock() {
   };
 
   return (
-    <div className="space-y-6 w-full max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 pb-12">
       
       {/* Cabecera Principal Elegante */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200/90 p-4 sm:p-6 rounded-3xl shadow-sm">
         <div className="flex items-start sm:items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0 shadow-xs">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -332,15 +332,15 @@ export default function SparePartsStock() {
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg sm:text-2xl font-bold text-slate-800 tracking-tight">
+              <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
                 Control de Stock e Inventario
               </h2>
-              <span className="text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full shadow-2xs">
-                Categorías: <strong className="font-bold">{uniqueCategoriesCount}</strong> / {maxCategoriesLimit > 0 ? maxCategoriesLimit : 'Ilimitadas'}
+              <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1 rounded-full shadow-2xs">
+                Categorías: <strong className="font-extrabold">{uniqueCategoriesCount}</strong> / {maxCategoriesLimit > 0 ? maxCategoriesLimit : 'Ilimitadas'}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Máx. productos por categoría: <strong className="text-slate-700">{maxProductsPerCategoryLimit > 0 ? maxProductsPerCategoryLimit : 'Ilimitados'}</strong>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
+              Máx. productos por categoría: <strong className="text-slate-800">{maxProductsPerCategoryLimit > 0 ? maxProductsPerCategoryLimit : 'Ilimitados'}</strong>
             </p>
           </div>
         </div>
@@ -352,7 +352,7 @@ export default function SparePartsStock() {
             setNewCategoryName('');
             setIsCategoryModalOpen(true);
           }}
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0"
+          className="w-full sm:w-auto bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 text-white px-5 py-3 rounded-2xl text-sm font-semibold transition-all shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer shrink-0"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -363,13 +363,14 @@ export default function SparePartsStock() {
 
       {/* Alerta de Error */}
       {errorMsg && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs sm:text-sm font-medium">
+        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
           {errorMsg}
         </div>
       )}
 
       {/* Barra de Búsqueda Compacta */}
-      <div className="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-2xl shadow-sm">
+      <div className="bg-white border border-slate-200/90 p-3.5 sm:p-4 rounded-3xl shadow-sm">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,13 +387,13 @@ export default function SparePartsStock() {
             placeholder="Buscar por nombre de producto o categoría..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-9 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 placeholder-slate-400 transition-all"
+            className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl pl-10 pr-9 py-3 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 transition-all shadow-sm"
           />
           {searchTerm && (
             <button
               type="button"
               onClick={() => setSearchTerm('')}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
             >
               ✕
             </button>
@@ -402,8 +403,8 @@ export default function SparePartsStock() {
 
       {/* Listado en Tarjetas de Categorías */}
       {loading ? (
-        <div className="py-24 text-center text-slate-500 text-sm flex flex-col items-center justify-center gap-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="py-24 text-center text-slate-500 text-sm flex flex-col items-center justify-center gap-3 bg-white border border-slate-200/90 rounded-3xl shadow-sm">
+          <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
           Cargando inventario desde Firebase...
         </div>
       ) : Object.keys(filteredGroups).length > 0 ? (
@@ -412,17 +413,17 @@ export default function SparePartsStock() {
             const isAtProductLimit = maxProductsPerCategoryLimit > 0 && products.length >= maxProductsPerCategoryLimit;
 
             return (
-              <div key={category.id} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+              <div key={category.id} className="bg-white border border-slate-200/90 rounded-3xl shadow-sm overflow-hidden flex flex-col">
                 
                 {/* Cabecera de la Tarjeta de Categoría */}
-                <div className="bg-slate-50/90 border-b border-slate-200 px-5 py-3.5 flex justify-between items-center gap-3">
+                <div className="bg-slate-50/80 border-b border-slate-200/80 px-5 py-4 flex justify-between items-center gap-3">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="w-3 h-3 rounded-full bg-blue-600 shrink-0" />
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide truncate">
+                    <span className="w-3 h-3 rounded-full bg-indigo-600 shrink-0" />
+                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide truncate">
                       {category.name}
                     </h3>
-                    <span className={`text-xs border px-2.5 py-0.5 rounded-full font-semibold shadow-2xs shrink-0 ${
-                      isAtProductLimit ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-white text-slate-600 border-slate-200'
+                    <span className={`text-xs border px-2.5 py-0.5 rounded-full font-bold shadow-2xs shrink-0 ${
+                      isAtProductLimit ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-white text-slate-600 border-slate-200'
                     }`}>
                       {products.length} / {maxProductsPerCategoryLimit > 0 ? maxProductsPerCategoryLimit : '∞'} prods.
                     </span>
@@ -431,7 +432,7 @@ export default function SparePartsStock() {
                   <button
                     type="button"
                     onClick={() => handleOpenAddProduct(category)}
-                    className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm shrink-0 flex items-center gap-1"
+                    className="bg-indigo-50 hover:bg-indigo-600 active:scale-95 text-indigo-600 hover:text-white border border-indigo-100 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-2xs shrink-0 flex items-center gap-1"
                   >
                     <span>+ Producto</span>
                   </button>
@@ -440,7 +441,7 @@ export default function SparePartsStock() {
                 {/* Tabla interna de productos de la categoría */}
                 {products.length > 0 ? (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse min-w-125">
                       <thead>
                         <tr className="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/30">
                           <th className="p-3 sm:px-4">Producto</th>
@@ -449,14 +450,14 @@ export default function SparePartsStock() {
                           <th className="p-3 sm:px-4 text-right">Acciones</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 text-xs">
+                      <tbody className="divide-y divide-slate-100 text-xs font-medium">
                         {products.map((prod) => {
                           const currentStock = Number(prod.stock ?? 0);
                           const isLowStock = currentStock <= 3;
 
                           return (
                             <tr key={prod.id} className="hover:bg-slate-50/60 transition-colors">
-                              <td className="p-3 sm:px-4 font-semibold text-slate-800">
+                              <td className="p-3 sm:px-4 font-bold text-slate-900">
                                 {prod.name}
                               </td>
                               <td className="p-3 sm:px-4">
@@ -465,27 +466,27 @@ export default function SparePartsStock() {
                                     {currentStock} un.
                                   </span>
                                   {isLowStock && (
-                                    <span className="text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.2 rounded">
+                                    <span className="text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-md">
                                       Bajo
                                     </span>
                                   )}
                                 </div>
                               </td>
-                              <td className="p-3 sm:px-4 text-cyan-600 font-mono font-bold">
+                              <td className="p-3 sm:px-4 text-indigo-600 font-mono font-extrabold">
                                 ${Number(prod.price || 0).toLocaleString('es-AR')}
                               </td>
-                              <td className="p-3 sm:px-4 text-right space-x-1">
+                              <td className="p-3 sm:px-4 text-right space-x-1.5">
                                 <button
                                   type="button"
                                   onClick={() => handleOpenEditProduct(prod, category)}
-                                  className="bg-slate-100 hover:bg-slate-200 text-blue-600 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-slate-200 transition-all cursor-pointer"
+                                  className="bg-slate-100 hover:bg-slate-200 active:scale-95 text-indigo-600 text-[11px] font-bold px-3 py-1.5 rounded-xl border border-slate-200/80 transition-all cursor-pointer shadow-2xs"
                                 >
                                   Editar
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteProduct(prod.id, category.id)}
-                                  className="bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-rose-200 transition-all cursor-pointer"
+                                  className="bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 text-[11px] font-bold px-3 py-1.5 rounded-xl border border-rose-100 transition-all cursor-pointer shadow-2xs"
                                 >
                                   Eliminar
                                 </button>
@@ -497,7 +498,7 @@ export default function SparePartsStock() {
                     </table>
                   </div>
                 ) : (
-                  <div className="py-6 text-center text-slate-400 text-xs italic">
+                  <div className="py-8 text-center text-slate-400 text-xs font-medium italic">
                     Sin productos en esta categoría.
                   </div>
                 )}
@@ -507,44 +508,51 @@ export default function SparePartsStock() {
           })}
         </div>
       ) : (
-        <div className="py-16 text-center text-slate-400 italic text-sm bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <div className="py-16 text-center text-slate-400 font-medium text-sm bg-white border border-slate-200/90 rounded-3xl shadow-sm">
           No hay categorías creadas. Hacé clic en "+ Agregar Categoría" arriba para comenzar.
         </div>
       )}
 
       {/* Modal: Crear Categoría */}
       {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
-          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-5 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4">
+          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-5 sm:p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-800">Agregar Nueva Categoría</h3>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="text-slate-400 hover:text-slate-700">✕</button>
+              <h3 className="text-base font-bold text-slate-900">Agregar Nueva Categoría</h3>
+              <button 
+                onClick={() => setIsCategoryModalOpen(false)} 
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
             <form onSubmit={handleSaveCategory} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Nombre de la Categoría</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Nombre de la Categoría <span className="text-indigo-600">*</span>
+                </label>
                 <input
                   type="text"
                   required
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="Ej. Pantallas, Baterías..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   disabled={saving}
                   onClick={() => setIsCategoryModalOpen(false)}
-                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
+                  className="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 px-4 py-2.5 rounded-2xl text-xs font-semibold border border-slate-200/80 cursor-pointer disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm"
+                  className="bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 text-white px-5 py-2.5 rounded-2xl text-xs font-semibold shadow-md shadow-indigo-500/20 cursor-pointer disabled:opacity-50"
                 >
                   {saving ? 'Guardando...' : 'Guardar Categoría'}
                 </button>
@@ -556,19 +564,24 @@ export default function SparePartsStock() {
 
       {/* Modal: Crear / Editar Producto */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
-          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-5 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4">
+          <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-5 sm:p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-800">
+              <h3 className="text-base font-bold text-slate-900 truncate pr-2">
                 {editingProduct ? 'Editar Producto' : `Agregar a: ${selectedCategoryObj?.name}`}
               </h3>
-              <button onClick={() => setIsProductModalOpen(false)} className="text-slate-400 hover:text-slate-700">✕</button>
+              <button 
+                onClick={() => setIsProductModalOpen(false)} 
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100/80 transition-colors cursor-pointer shrink-0"
+              >
+                ✕
+              </button>
             </div>
 
             <form onSubmit={handleSaveProduct} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Nombre / Descripción del Producto <span className="text-blue-600">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Nombre / Descripción del Producto <span className="text-indigo-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -576,14 +589,14 @@ export default function SparePartsStock() {
                   value={productForm.name}
                   onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                   placeholder="Ej. Módulo Display OLED Samsung A12"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Stock <span className="text-blue-600">*</span>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Stock <span className="text-indigo-600">*</span>
                   </label>
                   <input
                     type="number"
@@ -592,12 +605,12 @@ export default function SparePartsStock() {
                     value={productForm.stock}
                     onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
                     placeholder="0"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm font-mono focus:outline-none focus:border-indigo-500 shadow-sm transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Precio ($) <span className="text-blue-600">*</span>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Precio ($) <span className="text-indigo-600">*</span>
                   </label>
                   <input
                     type="number"
@@ -607,24 +620,24 @@ export default function SparePartsStock() {
                     value={productForm.price}
                     onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
                     placeholder="0.00"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm font-mono focus:outline-none focus:border-indigo-500 shadow-sm transition-all"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   disabled={saving}
                   onClick={() => setIsProductModalOpen(false)}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold border"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4.5 py-2.5 rounded-2xl text-xs font-semibold border border-slate-200/80 cursor-pointer disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-xs font-semibold shadow-sm flex items-center gap-2"
+                  className="bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 disabled:opacity-50 text-white px-5 py-2.5 rounded-2xl text-xs font-semibold shadow-md shadow-indigo-500/20 cursor-pointer flex items-center gap-2"
                 >
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                   {saving ? 'Guardando...' : 'Guardar Producto'}

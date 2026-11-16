@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   collection,
   getDocs,
@@ -11,6 +11,117 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '../../services/firebase';
 
+// Componente auxiliar para renderizar el mini patrón animado con longitud calculada dinámicamente
+function PatternViewer({ lockValue }) {
+  if (!lockValue) return <span className="text-slate-400">Patrón vacío</span>;
+
+  const dotIds = lockValue.split('-').map(Number).filter(n => !isNaN(n));
+  const startDotId = dotIds[0];
+
+  const dotCoordinates = {
+    1: { x: 24, y: 24 },
+    2: { x: 60, y: 24 },
+    3: { x: 96, y: 24 },
+    4: { x: 24, y: 60 },
+    5: { x: 60, y: 60 },
+    6: { x: 96, y: 60 },
+    7: { x: 24, y: 96 },
+    8: { x: 60, y: 96 },
+    9: { x: 96, y: 96 },
+  };
+
+  const pointsString = dotIds
+    .map(id => dotCoordinates[id] ? `${dotCoordinates[id].x},${dotCoordinates[id].y}` : '')
+    .filter(Boolean)
+    .join(' ');
+
+  const polylineRef = useRef(null);
+  const [dashLength, setDashLength] = useState(800);
+  const [animationKey, setAnimationKey] = useState(0);
+
+  useEffect(() => {
+    if (polylineRef.current) {
+      try {
+        const length = polylineRef.current.getTotalLength();
+        if (length > 0) setDashLength(length);
+      } catch (e) {
+        // Fallback
+      }
+    }
+  }, [pointsString]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimationKey(prev => prev + 1);
+    }, 9000); 
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="relative w-32 h-32 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 120 120">
+          {dotIds.length > 1 && (
+            <polyline
+              ref={polylineRef}
+              key={animationKey}
+              fill="none"
+              stroke="#2563eb"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points={pointsString}
+              style={{
+                strokeDasharray: dashLength,
+                strokeDashoffset: dashLength,
+                animation: 'drawPath 7s ease-in-out infinite',
+              }}
+            />
+          )}
+        </svg>
+        <div className="grid grid-cols-3 gap-5 z-10">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((dotId) => {
+            const isSelected = dotIds.includes(dotId);
+            const isStart = dotId === startDotId;
+
+            return (
+              <div
+                key={dotId}
+                className={`w-3.5 h-3.5 rounded-full transition-all ${
+                  isStart
+                    ? 'bg-emerald-500 scale-150 ring-4 ring-emerald-200 animate-pulse'
+                    : isSelected
+                    ? 'bg-blue-600 scale-125 ring-2 ring-blue-200'
+                    : 'bg-slate-300'
+                }`}
+                title={isStart ? 'Inicio del patrón' : ''}
+              />
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-xs font-semibold text-slate-700">Patrón</span>
+        <span className="text-[10px] text-emerald-600 font-medium">● Verde = Inicio</span>
+      </div>
+
+      <style>{`
+        @keyframes drawPath {
+          0% {
+            stroke-dashoffset: ${dashLength};
+          }
+          75% {
+            stroke-dashoffset: 0;
+          }
+          100% {
+            stroke-dashoffset: 0;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function RepairList() {
   const [repairs, setRepairs] = useState([]);
   const [clients, setClients] = useState([]);
@@ -18,6 +129,7 @@ export default function RepairList() {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [shopName, setShopName] = useState('TALLER'); // Estado para guardar el nombre del comercio
 
   // Estado para el modal de Presupuesto / Revisión
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
@@ -39,7 +151,24 @@ export default function RepairList() {
     issue: '',
     advancePayment: '',
     totalPrice: '',
+    lockType: 'ninguno',
+    lockValue: '',
   });
+
+  const [patternDots, setPatternDots] = useState([]);
+  const [isDrawingPattern, setIsDrawingPattern] = useState(false);
+
+  const dotCoordinates = {
+    1: { x: 40, y: 40 },
+    2: { x: 100, y: 40 },
+    3: { x: 160, y: 40 },
+    4: { x: 40, y: 100 },
+    5: { x: 100, y: 100 },
+    6: { x: 160, y: 100 },
+    7: { x: 40, y: 160 },
+    8: { x: 100, y: 160 },
+    9: { x: 160, y: 160 },
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -51,6 +180,13 @@ export default function RepairList() {
 
       setLoading(true);
       try {
+        // Obtener nombre del comercio desde el documento principal del usuario
+        const shopDocRef = doc(db, 'comercios', user.uid);
+        const shopSnap = await getDoc(shopDocRef);
+        if (shopSnap.exists() && shopSnap.data().name) {
+          setShopName(shopSnap.data().name.toUpperCase());
+        }
+
         const repairsRef = collection(db, `comercios/${user.uid}/repairs`);
         const repairSnap = await getDocs(repairsRef);
         const repairList = [];
@@ -95,6 +231,36 @@ export default function RepairList() {
     }
   };
 
+  const handleDotMouseDown = (dotId) => {
+    setIsDrawingPattern(true);
+    setPatternDots([dotId]);
+    setNewOrder({ ...newOrder, lockValue: String(dotId) });
+  };
+
+  const handleDotMouseEnter = (dotId) => {
+    if (!isDrawingPattern) return;
+    if (!patternDots.includes(dotId)) {
+      const updatedDots = [...patternDots, dotId];
+      setPatternDots(updatedDots);
+      setNewOrder({ ...newOrder, lockValue: updatedDots.join('-') });
+    }
+  };
+
+  const handleMouseUpPattern = () => {
+    setIsDrawingPattern(false);
+  };
+
+  const handleClearPattern = () => {
+    setPatternDots([]);
+    setNewOrder({ ...newOrder, lockValue: '' });
+  };
+
+  const getSvgPointsString = () => {
+    return patternDots
+      .map((id) => `${dotCoordinates[id].x},${dotCoordinates[id].y}`)
+      .join(' ');
+  };
+
   const handleCreateOrder = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -118,6 +284,8 @@ export default function RepairList() {
         device: newOrder.device.trim(),
         serialNumber: newOrder.serialNumber.trim() || 'S/N',
         issue: newOrder.issue.trim() || 'Sin especificar',
+        lockType: newOrder.lockType,
+        lockValue: newOrder.lockValue.trim(),
         status: 'Recibido',
         repairDetails: '',
         budgetAmount: Number(newOrder.totalPrice) || 0,
@@ -140,7 +308,10 @@ export default function RepairList() {
         issue: '',
         advancePayment: '',
         totalPrice: '',
+        lockType: 'ninguno',
+        lockValue: '',
       });
+      setPatternDots([]);
     } catch (error) {
       console.error('Error al registrar orden:', error);
       setErrorMsg('No se pudo guardar la orden.');
@@ -183,7 +354,7 @@ export default function RepairList() {
 
             const newHistoryItem = {
               id: `rep_${Date.now()}`,
-              description: `${targetOrder.device} - Falla: ${targetOrder.issue} | Arreglo: ${targetOrder.repairDetails || 'Reparado'}`,
+              description: `${targetOrder.device} | Falla: ${targetOrder.issue} | Arreglo: ${targetOrder.repairDetails || 'Reparado'}`,
               amount: Number(targetOrder.budgetAmount || 0),
               date: new Date().toLocaleDateString('es-AR'),
             };
@@ -276,7 +447,7 @@ export default function RepairList() {
     let message = '';
     if (type === 'budget') {
       message = [
-        `🔧 *PRESUPUESTO DE REPARACIÓN - VALHALLA SERVICE*`,
+        `🔧 *PRESUPUESTO DE REPARACIÓN - ${shopName}*`,
         ``,
         `Hola *${order.clientName}*, tenemos novedades sobre tu equipo *${order.device}* (Orden: ${order.orderNumber}).`,
         ``,
@@ -287,7 +458,7 @@ export default function RepairList() {
       ].join('\n');
     } else if (type === 'ready') {
       message = [
-        `✅ *EQUIPO REPARADO - VALHALLA SERVICE*`,
+        `✅ *EQUIPO REPARADO - ${shopName}*`,
         ``,
         `Hola *${order.clientName}*, te informamos que tu *${order.device}* (Orden: ${order.orderNumber}) ya se encuentra reparado y listo para retirar por el taller. ¡Te esperamos!`,
       ].join('\n');
@@ -360,6 +531,7 @@ export default function RepairList() {
                   <th className="py-3.5 px-4">Nº Orden</th>
                   <th className="py-3.5 px-4">Cliente / Teléfono</th>
                   <th className="py-3.5 px-4">Dispositivo</th>
+                  <th className="py-3.5 px-4">Bloqueo</th>
                   <th className="py-3.5 px-4">Detalle / Presupuesto</th>
                   <th className="py-3.5 px-4">Estado</th>
                   <th className="py-3.5 px-4 text-right">Acciones WhatsApp</th>
@@ -382,6 +554,12 @@ export default function RepairList() {
                       <td className="py-4 px-4 font-medium text-slate-800">
                         {ord.device}
                         <div className="text-slate-400 text-[11px]">Falla: {ord.issue}</div>
+                      </td>
+                      <td className="py-4 px-4 text-xs">
+                        {ord.lockType === 'ninguno' && <span className="text-slate-400">Sin bloqueo</span>}
+                        {ord.lockType === 'pin' && <span className="font-semibold text-slate-700">PIN: {ord.lockValue}</span>}
+                        {ord.lockType === 'password' && <span className="font-semibold text-slate-700">Pass: {ord.lockValue}</span>}
+                        {ord.lockType === 'pattern' && <PatternViewer lockValue={ord.lockValue} />}
                       </td>
                       <td className="py-4 px-4 text-slate-600">
                         <div className="font-semibold text-slate-800">
@@ -437,7 +615,7 @@ export default function RepairList() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center py-12 text-slate-400 text-xs sm:text-sm">
+                    <td colSpan="7" className="text-center py-12 text-slate-400 text-xs sm:text-sm">
                       No hay órdenes de reparación registradas en este local.
                     </td>
                   </tr>
@@ -559,7 +737,7 @@ export default function RepairList() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateOrder} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+            <form onSubmit={handleCreateOrder} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto" onMouseUp={handleMouseUpPattern}>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Seleccionar de Cartera de Clientes <span className="text-slate-400 font-normal">(opcional)</span>
@@ -645,6 +823,121 @@ export default function RepairList() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
                   />
                 </div>
+              </div>
+
+              {/* Sección de Bloqueo del Equipo */}
+              <div className="pt-2 border-t border-slate-100 space-y-3">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Método de Desbloqueo del Equipo
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'ninguno', label: 'Sin bloqueo' },
+                    { id: 'pin', label: 'PIN' },
+                    { id: 'password', label: 'Contraseña' },
+                    { id: 'pattern', label: 'Patrón' },
+                  ].map((type) => (
+                    <button
+                      key={type.id}
+                      type="button"
+                      onClick={() => {
+                        setNewOrder({ ...newOrder, lockType: type.id, lockValue: '' });
+                        setPatternDots([]);
+                      }}
+                      className={`py-2 px-1 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
+                        newOrder.lockType === type.id
+                          ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Si es PIN */}
+                {newOrder.lockType === 'pin' && (
+                  <div>
+                    <input
+                      type="text"
+                      maxLength="8"
+                      value={newOrder.lockValue}
+                      onChange={(e) => setNewOrder({ ...newOrder, lockValue: e.target.value })}
+                      placeholder="Ingrese PIN (ej. 1234)"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                )}
+
+                {/* Si es Contraseña */}
+                {newOrder.lockType === 'password' && (
+                  <div>
+                    <input
+                      type="text"
+                      value={newOrder.lockValue}
+                      onChange={(e) => setNewOrder({ ...newOrder, lockValue: e.target.value })}
+                      placeholder="Ingrese contraseña de desbloqueo"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                )}
+
+                {/* Si es Patrón (Dibujo SVG Loop táctil sin números) */}
+                {newOrder.lockType === 'pattern' && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center space-y-3">
+                    <div className="flex justify-between w-full items-center">
+                      <span className="text-xs text-slate-500 font-medium">
+                        {patternDots.length > 0 ? `Patrón trazado (${patternDots.length} puntos)` : 'Deslicá sobre los puntos para dibujar'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleClearPattern}
+                        className="text-xs text-rose-600 hover:underline cursor-pointer font-semibold"
+                      >
+                        Limpiar patrón
+                      </button>
+                    </div>
+
+                    {/* Contenedor del Patrón tipo Loop Visual */}
+                    <div className="relative w-48 h-48 bg-white border border-slate-200 rounded-2xl shadow-inner flex items-center justify-center select-none">
+                      {/* Línea SVG dinámica que conecta los puntos estilo loop */}
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 200 200">
+                        {patternDots.length > 1 && (
+                          <polyline
+                            fill="none"
+                            stroke="#2563eb"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            points={getSvgPointsString()}
+                          />
+                        )}
+                      </svg>
+
+                      {/* Cuadrícula de 3x3 puntos interactivos limpios (sin números) */}
+                      <div className="grid grid-cols-3 gap-8 z-10">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((dotId) => {
+                          const isSelected = patternDots.includes(dotId);
+                          return (
+                            <div
+                              key={dotId}
+                              onMouseDown={() => handleDotMouseDown(dotId)}
+                              onMouseEnter={() => handleDotMouseEnter(dotId)}
+                              className={`w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 ${
+                                isSelected
+                                  ? 'bg-blue-600 scale-125 ring-4 ring-blue-200 shadow-md'
+                                  : 'bg-slate-200 hover:bg-slate-300'
+                              }`}
+                            >
+                              {/* Punto interior sutil (sin números) */}
+                              <div className={`w-2.5 h-2.5 rounded-full ${isSelected ? 'bg-white' : 'bg-slate-400'}`} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

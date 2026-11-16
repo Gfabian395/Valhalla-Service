@@ -76,44 +76,44 @@ export default function ServiceLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-indigo-600 selection:text-white">
 
       {/* Barra de Navegación Superior */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm sticky top-0 z-40">
+      <header className="bg-white/95 backdrop-blur-xl border-b border-slate-200/90 shadow-xs sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
+          <div className="flex justify-between h-16 sm:h-20 items-center">
 
             {/* Logo y Nombre del Taller */}
-            <div className="flex items-center space-x-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-600/20 shrink-0">
+            <div className="flex items-center space-x-3.5 min-w-0">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     d="M13 10V3L4 14h7v7l9-11h-7z"
                   />
                 </svg>
               </div>
               <div className="min-w-0">
-                <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-800 truncate">
+                <h1 className="text-sm sm:text-lg font-bold tracking-tight text-slate-900 truncate">
                   {workshopName}
                 </h1>
-                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-widest">
+                <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">
                   Panel Operativo
                 </p>
               </div>
             </div>
 
             {/* Enlaces de Navegación (Desktop) */}
-            <nav className="hidden md:flex items-center space-x-1.5">
+            <nav className="hidden md:flex items-center space-x-2">
               {navigationLinks.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-3.5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 ${
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
                     isActive(item.path)
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/25'
+                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
@@ -125,11 +125,11 @@ export default function ServiceLayout() {
 
             {/* Perfil / Acciones derecha (Desktop) */}
             <div className="hidden md:flex items-center space-x-3">
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full">
-                <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center uppercase">
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 rounded-2xl">
+                <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-extrabold text-xs flex items-center justify-center uppercase">
                   {userRole ? userRole.charAt(0) : 'A'}
                 </div>
-                <span className="text-xs text-slate-700 font-semibold capitalize">
+                <span className="text-xs text-slate-700 font-bold capitalize">
                   {userRole}
                 </span>
               </div>
@@ -137,7 +137,7 @@ export default function ServiceLayout() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-xs font-semibold bg-white hover:bg-rose-50 text-rose-600 px-3.5 py-2 rounded-full border border-rose-200 hover:border-rose-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                className="text-xs font-bold bg-white hover:bg-rose-50 text-rose-600 px-4 py-2.5 rounded-2xl border border-rose-200 hover:border-rose-300 transition-all cursor-pointer flex items-center gap-2 shadow-2xs active:scale-95"
                 title="Cerrar sesión"
               >
                 <span>Salir</span>
@@ -150,13 +150,13 @@ export default function ServiceLayout() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 flex items-center justify-center focus:outline-none border border-slate-200 cursor-pointer transition-colors"
+                className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 flex items-center justify-center focus:outline-none border border-slate-200/80 cursor-pointer transition-colors"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
                   )}
                 </svg>
               </button>
@@ -167,31 +167,31 @@ export default function ServiceLayout() {
 
         {/* Menú Desplegable Móvil */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-4 pt-2 pb-4 space-y-1.5 shadow-lg">
+          <div className="md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-4 pt-3 pb-5 space-y-2 shadow-xl animate-in slide-in-from-top-2 duration-200">
             {navigationLinks.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`px-3.5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2.5 transition-all ${
+                className={`px-4 py-3 rounded-2xl text-sm font-bold flex items-center gap-3 transition-all ${
                   isActive(item.path)
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >
-                <span className="text-base">{item.icon}</span>
+                <span className="text-lg">{item.icon}</span>
                 {item.name}
               </Link>
             ))}
 
             <div className="pt-3 mt-2 border-t border-slate-100 flex justify-between items-center px-1">
-              <span className="text-xs text-blue-600 uppercase font-mono font-bold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+              <span className="text-xs text-indigo-700 uppercase font-mono font-bold bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100">
                 Rol: {userRole}
               </span>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-1.5 rounded-lg cursor-pointer hover:bg-rose-100 transition-colors"
+                className="text-xs font-bold bg-rose-50 text-rose-600 border border-rose-100 px-4 py-2 rounded-xl cursor-pointer hover:bg-rose-100 transition-colors shadow-2xs"
               >
                 Salir 🚪
               </button>
@@ -201,17 +201,17 @@ export default function ServiceLayout() {
       </header>
 
       {/* Contenido Dinámico de las Vistas */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8">
         <Outlet />
       </main>
 
       {/* Footer Minimalista Unificado */}
-      <footer className="bg-white border-t border-slate-200 py-6 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <footer className="bg-white border-t border-slate-200/90 py-6 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
           <p>© {new Date().getFullYear()} {workshopName} — Valhalla Service.</p>
           <div className="flex items-center space-x-4">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="inline-flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Sistema Operativo Activo
             </span>
           </div>

@@ -19,11 +19,13 @@ function App() {
     <BrowserRouter>
       <NavigationTracker />
       <Routes>
+        {/* Rutas Públicas de Acceso */}
         <Route path="/login" element={<LoginOnboarding />} />
         <Route path="/setup-workshop" element={<Navigate to="/service/settings" replace />} />
         <Route path="/subscription" element={<Navigate to="/service/reparaciones" replace />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
 
+        {/* Rutas Privadas Protegidas y Enrutadas en el Layout del Taller */}
         <Route element={<ProtectedRoute />}>
           <Route path="/service" element={<ServiceLayout />}>
             <Route index element={<Navigate to="reparaciones" replace />} />
@@ -34,6 +36,7 @@ function App() {
           </Route>
         </Route>
 
+        {/* Ruta Comodín para Redirección de URLs Inexistentes */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

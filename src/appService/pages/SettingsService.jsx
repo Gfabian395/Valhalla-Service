@@ -143,18 +143,18 @@ export default function SettingsService() {
   if (loading) {
     return (
       <div className="py-24 text-center text-slate-500 text-sm flex flex-col items-center justify-center gap-3">
-        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
         Cargando parámetros del taller...
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 w-full max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 w-full max-w-4xl mx-auto px-3 sm:px-6 py-4 pb-12">
       
-      <div className="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-white border border-slate-200/90 p-4 sm:p-6 rounded-3xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0 shadow-xs">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -171,7 +171,7 @@ export default function SettingsService() {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg sm:text-2xl font-bold text-slate-800 tracking-tight">
+            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
               Configuración del Taller
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
@@ -181,76 +181,77 @@ export default function SettingsService() {
         </div>
 
         {saved && (
-          <span className="text-xs font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200 px-3.5 py-2 rounded-xl animate-pulse shrink-0">
+          <span className="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-2xl animate-pulse shrink-0 shadow-2xs">
             ¡Configuración guardada!
           </span>
         )}
       </div>
 
       {errorMsg && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs sm:text-sm font-medium">
+        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
           {errorMsg}
         </div>
       )}
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-6"
+        className="bg-white border border-slate-200/90 p-5 sm:p-6 rounded-3xl shadow-sm space-y-6"
       >
         
         <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Datos del Negocio (Registrados al Alta)
             </h3>
-            <span className="text-[11px] text-slate-400 italic">No modificables</span>
+            <span className="text-[11px] text-slate-400 font-medium italic">No modificables</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 Nombre del Taller
               </label>
               <input
                 type="text"
                 disabled
                 value={settings.workshopName}
-                className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-500 text-sm cursor-not-allowed"
+                className="w-full bg-slate-100/80 border border-slate-200 rounded-2xl px-4 py-3 text-slate-500 text-sm cursor-not-allowed font-medium"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 Teléfono de Contacto
               </label>
               <input
                 type="tel"
                 disabled
                 value={settings.phone}
-                className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-500 text-sm cursor-not-allowed"
+                className="w-full bg-slate-100/80 border border-slate-200 rounded-2xl px-4 py-3 text-slate-500 text-sm cursor-not-allowed font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Dirección del Local
             </label>
             <input
               type="text"
               disabled
               value={settings.address}
-              className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-500 text-sm cursor-not-allowed"
+              className="w-full bg-slate-100/80 border border-slate-200 rounded-2xl px-4 py-3 text-slate-500 text-sm cursor-not-allowed font-medium"
             />
           </div>
         </div>
 
         <div className="space-y-4 pt-2">
-          <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider border-b border-slate-100 pb-2.5">
+          <h3 className="text-xs font-bold text-indigo-600 uppercase tracking-wider border-b border-slate-100 pb-3">
             Garantías y Políticas del Servicio (Editables)
           </h3>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Días de Garantía por Defecto
             </label>
             <input
@@ -259,12 +260,12 @@ export default function SettingsService() {
               name="defaultWarrantyDays"
               value={settings.defaultWarrantyDays}
               onChange={handleChange}
-              className="w-full sm:w-1/3 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm font-mono focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+              className="w-full sm:w-1/3 bg-slate-50/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-slate-900 text-sm font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Términos y Condiciones (Pie de Comprobante / Ticket)
             </label>
             <textarea
@@ -272,7 +273,7 @@ export default function SettingsService() {
               rows="3"
               value={settings.termsAndConditions}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none transition-all leading-relaxed"
+              className="w-full bg-slate-50/80 border border-slate-200/90 rounded-2xl p-4 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 shadow-sm transition-all resize-none leading-relaxed"
             ></textarea>
           </div>
         </div>
@@ -281,7 +282,7 @@ export default function SettingsService() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
+            className="w-full sm:w-auto bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 disabled:opacity-50 text-white px-6 py-3.5 rounded-2xl text-sm font-semibold transition-all shadow-md shadow-indigo-500/20 cursor-pointer flex items-center justify-center gap-2"
           >
             {saving && (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -292,17 +293,17 @@ export default function SettingsService() {
 
       </form>
 
-      <div className="bg-slate-50 border border-slate-200/80 p-4 sm:p-5 rounded-2xl shadow-2xs space-y-3">
-        <div className="border-b border-slate-200 pb-2">
-          <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+      <div className="bg-white border border-slate-200/90 p-5 sm:p-6 rounded-3xl shadow-sm space-y-4">
+        <div className="border-b border-slate-100 pb-3">
+          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
             Mi Suscripción y Planes Disponibles
           </h3>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-xs text-slate-500 mt-0.5">
             Consultá tu plan activo de servicio.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           {plans.map((plan) => {
             const isCurrent = currentPlanId === plan.id;
             const planName = plan.nombre || plan.name || 'Plan';
@@ -312,29 +313,29 @@ export default function SettingsService() {
             return (
               <div
                 key={plan.id}
-                className={`p-4 rounded-xl border flex flex-col justify-between text-xs transition-all ${
+                className={`p-4.5 rounded-2xl border-2 flex flex-col justify-between text-xs transition-all ${
                   isCurrent
-                    ? 'bg-blue-50/70 border-blue-500 shadow-2xs'
-                    : 'bg-white border-slate-200'
+                    ? 'bg-indigo-50/50 border-indigo-600 shadow-sm'
+                    : 'bg-slate-50/50 border-slate-200/90'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between gap-1 mb-2">
-                    <span className="font-bold text-slate-800 text-sm">{planName}</span>
+                  <div className="flex items-center justify-between gap-1 mb-3">
+                    <span className="font-bold text-slate-900 text-sm">{planName}</span>
                     {isCurrent && (
-                      <span className="text-[9px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase">
+                      <span className="text-[10px] font-extrabold bg-indigo-600 text-white px-2.5 py-0.5 rounded-full uppercase shadow-2xs">
                         Actual
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
+                  <div className="grid grid-cols-2 gap-2 text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs">
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Alta Única</span>
-                      <span className="font-bold text-blue-600">${planPrice.toLocaleString('es-AR')}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Alta Única</span>
+                      <span className="font-extrabold text-indigo-600 text-sm">${planPrice.toLocaleString('es-AR')}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Mantenimiento</span>
-                      <span className="font-bold text-slate-800">${planMaintenance.toLocaleString('es-AR')}/m</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mantenimiento</span>
+                      <span className="font-extrabold text-slate-900 text-sm">${planMaintenance.toLocaleString('es-AR')}/m</span>
                     </div>
                   </div>
                 </div>
@@ -343,7 +344,7 @@ export default function SettingsService() {
                   <button
                     type="button"
                     onClick={() => handleUpgradePlan(plan)}
-                    className="mt-3 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 px-2.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1"
+                    className="mt-4 w-full bg-slate-900 hover:bg-slate-800 active:scale-95 text-white py-2.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                   >
                     <span>💬 Consultar Plan</span>
                   </button>
