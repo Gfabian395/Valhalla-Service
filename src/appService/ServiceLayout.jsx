@@ -85,7 +85,7 @@ export default function ServiceLayout() {
 
             {/* Logo y Nombre del Taller */}
             <div className="flex items-center space-x-3.5 min-w-0">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+              <div className="w-11 h-11 rounded-2xl bg-linear-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -113,7 +113,7 @@ export default function ServiceLayout() {
                   to={item.path}
                   className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
                     isActive(item.path)
-                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20'
+                      ? 'bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
@@ -175,7 +175,7 @@ export default function ServiceLayout() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`px-4 py-3 rounded-2xl text-sm font-bold flex items-center gap-3 transition-all ${
                   isActive(item.path)
-                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20'
+                    ? 'bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20'
                     : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >

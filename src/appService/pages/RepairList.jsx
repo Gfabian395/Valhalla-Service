@@ -15,7 +15,7 @@ import { auth, db } from '../../services/firebase';
 function PatternViewer({ lockValue }) {
   if (!lockValue) return <span className="text-slate-400">Patrón vacío</span>;
 
-  const dotIds = lockValue.split('-').map(Number).filter(n => !isNaN(n));
+  const dotIds = lockValue.split('-').map(Number).filter((n) => !isNaN(n));
   const startDotId = dotIds[0];
 
   const dotCoordinates = {
@@ -31,7 +31,7 @@ function PatternViewer({ lockValue }) {
   };
 
   const pointsString = dotIds
-    .map(id => dotCoordinates[id] ? `${dotCoordinates[id].x},${dotCoordinates[id].y}` : '')
+    .map((id) => (dotCoordinates[id] ? `${dotCoordinates[id].x},${dotCoordinates[id].y}` : ''))
     .filter(Boolean)
     .join(' ');
 
@@ -52,8 +52,8 @@ function PatternViewer({ lockValue }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setAnimationKey(prev => prev + 1);
-    }, 9000); 
+      setAnimationKey((prev) => prev + 1);
+    }, 9000);
     return () => clearInterval(interval);
   }, []);
 
@@ -129,7 +129,16 @@ export default function RepairList() {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [shopName, setShopName] = useState('TALLER'); // Estado para guardar el nombre del comercio
+  const [shopName, setShopName] = useState('TALLER');
+
+  // Check para alternar entre cliente existente y nuevo cliente dentro del modal de ingreso
+  const [isNewClient, setIsNewClient] = useState(false);
+  const [newClientData, setNewClientData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+  });
 
   // Estado para el modal de Presupuesto / Revisión
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
@@ -180,7 +189,6 @@ export default function RepairList() {
 
       setLoading(true);
       try {
-        // Obtener nombre del comercio desde el documento principal del usuario
         const shopDocRef = doc(db, 'comercios', user.uid);
         const shopSnap = await getDoc(shopDocRef);
         if (shopSnap.exists() && shopSnap.data().name) {
@@ -214,6 +222,41 @@ export default function RepairList() {
 
     fetchData();
   }, []);
+
+  const resetEntryModal = () => {
+    setIsNewClient(false);
+    setNewClientData({ name: '', phone: '', email: '', address: '' });
+    setNewOrder({
+      clientId: '',
+      clientName: '',
+      clientPhone: '',
+      alternativePhone: '',
+      device: '',
+      serialNumber: '',
+      issue: '',
+      advancePayment: '',
+      totalPrice: '',
+      lockType: 'ninguno',
+      lockValue: '',
+    });
+    setPatternDots([]);
+    setErrorMsg('');
+  };
+
+  const handleToggleNewClient = (checked) => {
+    setIsNewClient(checked);
+    setErrorMsg('');
+    if (checked) {
+      setNewOrder((prev) => ({
+        ...prev,
+        clientId: '',
+        clientName: '',
+        clientPhone: '',
+      }));
+    } else {
+      setNewClientData({ name: '', phone: '', email: '', address: '' });
+    }
+  };
 
   const handleClientSelect = (e) => {
     const selectedId = e.target.value;
@@ -265,21 +308,62 @@ export default function RepairList() {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!newOrder.clientName.trim() || !newOrder.device.trim()) {
+    const user = auth.currentUser;
+    if (!user) {
+      setErrorMsg('Debes iniciar sesión para registrar ingresos.');
+      return;
+    }
+
+    let resolvedClientId = newOrder.clientId || 'manual';
+    let resolvedClientName = newOrder.clientName.trim();
+    let resolvedClientPhone = newOrder.clientPhone.trim();
+
+    if (isNewClient) {
+      const trimmedName = newClientData.name.trim();
+      const trimmedPhone = newClientData.phone.trim();
+
+      if (!trimmedName || !trimmedPhone) {
+        setErrorMsg('Para un nuevo cliente, el nombre y el teléfono son obligatorios.');
+        return;
+      }
+
+      resolvedClientName = trimmedName;
+      resolvedClientPhone = trimmedPhone;
+    } else if (!resolvedClientName) {
       setErrorMsg('El cliente y el dispositivo son obligatorios.');
       return;
     }
 
-    const user = auth.currentUser;
-    if (!user) return;
+    if (!newOrder.device.trim()) {
+      setErrorMsg('El cliente y el dispositivo son obligatorios.');
+      return;
+    }
 
     setSaving(true);
     try {
+      if (isNewClient) {
+        const clientPayload = {
+          name: resolvedClientName,
+          phone: resolvedClientPhone,
+          email: newClientData.email.trim() || null,
+          address: newClientData.address.trim() || null,
+          createdAt: serverTimestamp(),
+        };
+
+        const clientDocRef = await addDoc(collection(db, `comercios/${user.uid}/clients`), clientPayload);
+        const createdClient = { id: clientDocRef.id, ...clientPayload };
+        resolvedClientId = clientDocRef.id;
+
+        setClients((prev) =>
+          [createdClient, ...prev].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+        );
+      }
+
       const orderPayload = {
         orderNumber: `OT-${Math.floor(1000 + Math.random() * 9000)}`,
-        clientId: newOrder.clientId || 'manual',
-        clientName: newOrder.clientName.trim(),
-        clientPhone: newOrder.clientPhone.trim(),
+        clientId: resolvedClientId,
+        clientName: resolvedClientName,
+        clientPhone: resolvedClientPhone,
         alternativePhone: newOrder.alternativePhone.trim(),
         device: newOrder.device.trim(),
         serialNumber: newOrder.serialNumber.trim() || 'S/N',
@@ -298,23 +382,10 @@ export default function RepairList() {
 
       setRepairs([{ id: docRef.id, ...orderPayload }, ...repairs]);
       setIsModalOpen(false);
-      setNewOrder({
-        clientId: '',
-        clientName: '',
-        clientPhone: '',
-        alternativePhone: '',
-        device: '',
-        serialNumber: '',
-        issue: '',
-        advancePayment: '',
-        totalPrice: '',
-        lockType: 'ninguno',
-        lockValue: '',
-      });
-      setPatternDots([]);
+      resetEntryModal();
     } catch (error) {
       console.error('Error al registrar orden:', error);
-      setErrorMsg('No se pudo guardar la orden.');
+      setErrorMsg('No se pudo guardar el ingreso o el cliente.');
     } finally {
       setSaving(false);
     }
@@ -324,7 +395,7 @@ export default function RepairList() {
     const user = auth.currentUser;
     if (!user) return;
 
-    const targetOrder = repairs.find(r => r.id === orderId);
+    const targetOrder = repairs.find((r) => r.id === orderId);
 
     if (newStatus === 'En Revisión') {
       setActiveOrderForBudget(targetOrder);
@@ -339,7 +410,9 @@ export default function RepairList() {
     }
 
     if (newStatus === 'Entregado') {
-      const confirmDeliver = window.confirm(`¿Marcar como Entregado? El equipo se removerá de órdenes activas y se guardará en el historial del cliente: ${targetOrder.clientName}`);
+      const confirmDeliver = window.confirm(
+        `¿Marcar como Entregado? El equipo se removerá de órdenes activas y se guardará en el historial del cliente: ${targetOrder.clientName}`
+      );
       if (!confirmDeliver) return;
 
       try {
@@ -434,7 +507,8 @@ export default function RepairList() {
   };
 
   const triggerWhatsAppMessage = (order, type, useAlternative = false, altPhone = '') => {
-    const phoneToUse = (useAlternative && altPhone) ? altPhone : (order.alternativePhone || order.clientPhone);
+    const phoneToUse =
+      useAlternative && altPhone ? altPhone : order.alternativePhone || order.clientPhone;
     if (!phoneToUse) {
       alert('El cliente no cuenta con un número de teléfono válido para WhatsApp.');
       return;
@@ -502,7 +576,7 @@ export default function RepairList() {
         <button
           type="button"
           onClick={() => {
-            setErrorMsg('');
+            resetEntryModal();
             setIsModalOpen(true);
           }}
           className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
@@ -557,15 +631,23 @@ export default function RepairList() {
                       </td>
                       <td className="py-4 px-4 text-xs">
                         {ord.lockType === 'ninguno' && <span className="text-slate-400">Sin bloqueo</span>}
-                        {ord.lockType === 'pin' && <span className="font-semibold text-slate-700">PIN: {ord.lockValue}</span>}
-                        {ord.lockType === 'password' && <span className="font-semibold text-slate-700">Pass: {ord.lockValue}</span>}
+                        {ord.lockType === 'pin' && (
+                          <span className="font-semibold text-slate-700">PIN: {ord.lockValue}</span>
+                        )}
+                        {ord.lockType === 'password' && (
+                          <span className="font-semibold text-slate-700">Pass: {ord.lockValue}</span>
+                        )}
                         {ord.lockType === 'pattern' && <PatternViewer lockValue={ord.lockValue} />}
                       </td>
                       <td className="py-4 px-4 text-slate-600">
                         <div className="font-semibold text-slate-800">
-                          {ord.budgetAmount ? `$${Number(ord.budgetAmount).toLocaleString('es-AR')}` : 'Sin cotizar'}
+                          {ord.budgetAmount
+                            ? `$${Number(ord.budgetAmount).toLocaleString('es-AR')}`
+                            : 'Sin cotizar'}
                         </div>
-                        <div className="text-xs text-slate-500 truncate max-w-xs">{ord.repairDetails || 'Sin detalle de arreglo'}</div>
+                        <div className="text-xs text-slate-500 truncate max-w-xs">
+                          {ord.repairDetails || 'Sin detalle de arreglo'}
+                        </div>
                       </td>
                       <td className="py-4 px-4">
                         <select
@@ -691,7 +773,9 @@ export default function RepairList() {
                   type="checkbox"
                   id="sendAlt"
                   checked={budgetData.sendToAlternative}
-                  onChange={(e) => setBudgetData({ ...budgetData, sendToAlternative: e.target.checked })}
+                  onChange={(e) =>
+                    setBudgetData({ ...budgetData, sendToAlternative: e.target.checked })
+                  }
                   className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
                 />
                 <label htmlFor="sendAlt" className="text-xs text-slate-600 cursor-pointer font-medium">
@@ -730,59 +814,157 @@ export default function RepairList() {
               </h3>
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  resetEntryModal();
+                  setIsModalOpen(false);
+                }}
                 className="text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateOrder} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto" onMouseUp={handleMouseUpPattern}>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Seleccionar de Cartera de Clientes <span className="text-slate-400 font-normal">(opcional)</span>
-                </label>
-                <select
-                  onChange={handleClientSelect}
-                  defaultValue=""
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+            {errorMsg && (
+              <div className="px-5 py-2.5 bg-rose-50 border-b border-rose-100 text-rose-600 text-xs font-medium">
+                {errorMsg}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleCreateOrder}
+              className="p-5 space-y-4 max-h-[80vh] overflow-y-auto"
+              onMouseUp={handleMouseUpPattern}
+            >
+              {/* Check para alternar entre cliente existente y nuevo cliente */}
+              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5">
+                <label
+                  htmlFor="newClientCheck"
+                  className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700 cursor-pointer select-none"
                 >
-                  <option value="" disabled>-- Elegir cliente existente --</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.phone})
-                    </option>
-                  ))}
-                </select>
+                  <input
+                    type="checkbox"
+                    id="newClientCheck"
+                    checked={isNewClient}
+                    onChange={(e) => handleToggleNewClient(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Nuevo cliente</span>
+                </label>
+                <span className="text-[11px] text-slate-400">
+                  {isNewClient ? 'Se guardará en cartera' : 'Desde cartera'}
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Nombre del Cliente <span className="text-blue-600">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newOrder.clientName}
-                    onChange={(e) => setNewOrder({ ...newOrder, clientName: e.target.value })}
-                    placeholder="Ej. Juan Pérez"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
-                  />
+              {!isNewClient ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Seleccionar de Cartera de Clientes{' '}
+                      <span className="text-slate-400 font-normal">(opcional)</span>
+                    </label>
+                    <select
+                      onChange={handleClientSelect}
+                      value={newOrder.clientId}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="">-- Elegir cliente existente --</option>
+                      {clients.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.phone})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                        Nombre del Cliente <span className="text-blue-600">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required={!isNewClient}
+                        value={newOrder.clientName}
+                        onChange={(e) => setNewOrder({ ...newOrder, clientName: e.target.value })}
+                        placeholder="Ej. Juan Pérez"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                        Teléfono Principal (WhatsApp)
+                      </label>
+                      <input
+                        type="tel"
+                        value={newOrder.clientPhone}
+                        onChange={(e) => setNewOrder({ ...newOrder, clientPhone: e.target.value })}
+                        placeholder="Ej. 11 2345 6789"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-blue-50/40 border border-blue-100 rounded-2xl p-4 space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Nombre Completo / Razón Social <span className="text-blue-600">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required={isNewClient}
+                      value={newClientData.name}
+                      onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
+                      placeholder="Ej. Roberto Gómez"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Teléfono / WhatsApp <span className="text-blue-600">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        required={isNewClient}
+                        value={newClientData.phone}
+                        onChange={(e) => setNewClientData({ ...newClientData, phone: e.target.value })}
+                        placeholder="Ej. 11 2345 6789"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Correo Electrónico{' '}
+                        <span className="text-slate-400 font-normal">(opcional)</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={newClientData.email}
+                        onChange={(e) => setNewClientData({ ...newClientData, email: e.target.value })}
+                        placeholder="cliente@ejemplo.com"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Dirección / Localidad{' '}
+                      <span className="text-slate-400 font-normal">(opcional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newClientData.address}
+                      onChange={(e) => setNewClientData({ ...newClientData, address: e.target.value })}
+                      placeholder="Ej. Av. Calchaquí 1234, Quilmes"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Teléfono Principal (WhatsApp)
-                  </label>
-                  <input
-                    type="tel"
-                    value={newOrder.clientPhone}
-                    onChange={(e) => setNewOrder({ ...newOrder, clientPhone: e.target.value })}
-                    placeholder="Ej. 11 2345 6789"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -887,7 +1069,9 @@ export default function RepairList() {
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center space-y-3">
                     <div className="flex justify-between w-full items-center">
                       <span className="text-xs text-slate-500 font-medium">
-                        {patternDots.length > 0 ? `Patrón trazado (${patternDots.length} puntos)` : 'Deslicá sobre los puntos para dibujar'}
+                        {patternDots.length > 0
+                          ? `Patrón trazado (${patternDots.length} puntos)`
+                          : 'Deslicá sobre los puntos para dibujar'}
                       </span>
                       <button
                         type="button"
@@ -898,10 +1082,11 @@ export default function RepairList() {
                       </button>
                     </div>
 
-                    {/* Contenedor del Patrón tipo Loop Visual */}
                     <div className="relative w-48 h-48 bg-white border border-slate-200 rounded-2xl shadow-inner flex items-center justify-center select-none">
-                      {/* Línea SVG dinámica que conecta los puntos estilo loop */}
-                      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 200 200">
+                      <svg
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                        viewBox="0 0 200 200"
+                      >
                         {patternDots.length > 1 && (
                           <polyline
                             fill="none"
@@ -914,7 +1099,6 @@ export default function RepairList() {
                         )}
                       </svg>
 
-                      {/* Cuadrícula de 3x3 puntos interactivos limpios (sin números) */}
                       <div className="grid grid-cols-3 gap-8 z-10">
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((dotId) => {
                           const isSelected = patternDots.includes(dotId);
@@ -929,8 +1113,11 @@ export default function RepairList() {
                                   : 'bg-slate-200 hover:bg-slate-300'
                               }`}
                             >
-                              {/* Punto interior sutil (sin números) */}
-                              <div className={`w-2.5 h-2.5 rounded-full ${isSelected ? 'bg-white' : 'bg-slate-400'}`} />
+                              <div
+                                className={`w-2.5 h-2.5 rounded-full ${
+                                  isSelected ? 'bg-white' : 'bg-slate-400'
+                                }`}
+                              />
                             </div>
                           );
                         })}
@@ -986,7 +1173,10 @@ export default function RepairList() {
                 <button
                   type="button"
                   disabled={saving}
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    resetEntryModal();
+                    setIsModalOpen(false);
+                  }}
                   className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 cursor-pointer"
                 >
                   Cancelar
